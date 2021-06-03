@@ -33,6 +33,31 @@ describe Oystercard do
 
   end
   
+  context 'touching card in and out' do
+
+    it 'is initially not in a journey' do
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'touches card in' do 
+      subject.top_up(10)
+      subject.touch_in
+      expect(subject).to be_in_journey
+    end
+
+    it 'touches card out' do
+      subject.top_up(10)
+      subject.touch_in
+      subject.touch_out
+      expect(subject).not_to be_in_journey
+    end
+
+    it 'raises an error if card has less than £1' do
+      minimum_balance = Oystercard::MINIMUM_BALANCE
+      expect{ subject.touch_in }.to raise_error "Need topping up, ye"
+    end
+  end
+
 end
 
 =begin
