@@ -1,6 +1,9 @@
 require 'oystercard'
 
 describe Oystercard do
+  let(:entry_station){ double :station }
+  let(:exit_station){ double :station }
+
   context 'adding money to the card' do
     it 'returns 0 when you ask for the initial balance' do
       expect(subject.balance).to eq 0
@@ -23,15 +26,15 @@ describe Oystercard do
     end
   end
 
-  context 'subtracting money from the card' do
-    it { is_expected.to respond_to(:deduct).with(1).argument }
+  # context 'subtracting money from the card' do
+    # it { is_expected.to respond_to(:deduct).with(1).argument }
 
-    it 'to deduct amount from balance' do
-      subject.top_up(20)
-      expect { subject.deduct(10) }.to change { subject.balance }.by -10
-    end
-
-  end
+    # it 'to deduct amount from balance' do
+    #   subject.top_up(20)
+    #   expect { subject.deduct(10) }.to change { subject.balance }.by -10
+    # end
+  # end
+  # REMOVED: deduct method has been made PRIVATE.
   
   context 'touching card in and out' do
 
@@ -41,21 +44,59 @@ describe Oystercard do
 
     it 'touches card in' do 
       subject.top_up(10)
-      subject.touch_in
+      subject.touch_in(entry_station)
       expect(subject).to be_in_journey
     end
 
     it 'touches card out' do
       subject.top_up(10)
-      subject.touch_in
-      subject.touch_out
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
       expect(subject).not_to be_in_journey
     end
 
     it 'raises an error if card has less than £1' do
       minimum_balance = Oystercard::MINIMUM_BALANCE
-      expect{ subject.touch_in }.to raise_error "Need topping up, ye"
+      expect{ subject.touch_in(entry_station) }.to raise_error "Need topping up, ye"
     end
+
+    it 'deduct balance by minimum charge' do
+      subject.top_up(10)
+      subject.touch_in(entry_station)
+      expect{subject.touch_out(exit_station)}.to change {subject.balance}.by (-Oystercard::MINIMUM_CHARGE)
+    end
+
+    # let(:entry_station){ double :station }
+
+    it 'stores entry station' do
+      subject.top_up(10)
+      subject.touch_in(entry_station)
+      expect(subject.entry_station).to eq entry_station
+    end
+
+    # let(:entry_station){ double :station }
+    # let(:exit_station){ double :station }
+
+    it 'stores exit station' do
+      subject.top_up(10)
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.exit_station).to eq exit_station
+    end
+
+    it 'has an empty list of journeys by default' do
+      expect(subject.journeys).to be_empty
+    end
+
+    let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
+
+    it 'stores a journey' do
+      subject.top_up(10)
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.journeys).to include journey
+    end
+
   end
 
 end
