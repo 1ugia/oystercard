@@ -24,6 +24,6 @@ Oystercard <-- deduct(value) --> balance
 Oystercard <-- touch_in(station)/touch_out(station) --> journey? --> status
 Oystercard <-- MINIMUM_BALANCE = 1 --> balance
 Oystercard <-- touch_out --> MINIMUM_CHARGE --> balance
-Station <-- name --> station
+Station <-- name <--> station
 
 ```
